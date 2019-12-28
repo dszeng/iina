@@ -174,7 +174,7 @@ class PlayerCore: NSObject {
   @discardableResult
   func openURLs(_ urls: [URL], shouldAutoLoad autoLoad: Bool = true) -> Int? {
     guard !urls.isEmpty else { return 0 }
-    var urls = Utility.resolveURLs(urls)
+    let urls = Utility.resolveURLs(urls)
 
     // handle BD folders and m3u / m3u8 files first
     if urls.count == 1 && (isBDFolder(urls[0]) ||
@@ -312,7 +312,7 @@ class PlayerCore: NSObject {
 
   // unload main window video view
   func uninitVideo() {
-    guard mainWindow.isWindowLoaded else { return }
+    guard mainWindow.loaded else { return }
     mainWindow.videoView.stopDisplayLink()
     mainWindow.videoView.uninit()
   }
@@ -341,7 +341,7 @@ class PlayerCore: NSObject {
     }
     switchedBackFromMiniPlayerManually = false
 
-    let needRestoreLayout = !miniPlayer.isWindowLoaded
+    let needRestoreLayout = !miniPlayer.loaded
     miniPlayer.showWindow(self)
 
     miniPlayer.updateTrack()
@@ -423,7 +423,7 @@ class PlayerCore: NSObject {
     }
     // if aspect ratio is not set
     if mainWindow.window?.aspectRatio == nil {
-      mainWindow.window?.aspectRatio = NSSize(width: AppData.widthWhenNoVideo, height: AppData.heightWhenNoVideo)
+      mainWindow.window?.aspectRatio = AppData.sizeWhenNoVideo
     }
     // hide mini player
     miniPlayer.window?.orderOut(nil)
@@ -622,7 +622,7 @@ class PlayerCore: NSObject {
   }
 
   func setVideoRotate(_ degree: Int) {
-    if AppData.rotations.index(of: degree)! >= 0 {
+    if AppData.rotations.firstIndex(of: degree)! >= 0 {
       mpv.setInt(MPVOption.Video.videoRotate, degree)
       info.rotation = degree
     }
@@ -769,12 +769,17 @@ class PlayerCore: NSObject {
     mpv.command(.playlistRemove, args: [index.description])
   }
 
-  func clearPlaylist() {
-    mpv.command(.playlistClear)
+  func playlistRemove(_ indexSet: IndexSet) {
+    var count = 0
+    for i in indexSet {
+      playlistRemove(i - count)
+      count += 1
+    }
+    postNotification(.iinaPlaylistChanged)
   }
 
-  func removeFromPlaylist(index: Int) {
-    mpv.command(.playlistRemove, args: ["\(index)"])
+  func clearPlaylist() {
+    mpv.command(.playlistClear)
   }
 
   func playFile(_ path: String) {
@@ -796,6 +801,7 @@ class PlayerCore: NSObject {
   func playChapter(_ pos: Int) {
     let chapter = info.chapters[pos]
     mpv.command(.seek, args: ["\(chapter.time.second)", "absolute"])
+    togglePause(false)
     // need to update time pos
     syncUITime()
   }
@@ -1157,7 +1163,7 @@ class PlayerCore: NSObject {
    These options currently include fullscreen and ontop.
    */
   private func checkUnsyncedWindowOptions() {
-    guard mainWindow.isWindowLoaded else { return }
+    guard mainWindow.loaded else { return }
 
     let fs = mpv.getFlag(MPVOption.Window.fullscreen)
     if fs != mainWindow.fsState.isFullscreen {
@@ -1218,7 +1224,7 @@ class PlayerCore: NSObject {
 
   func syncUI(_ option: SyncUIOption) {
     // if window not loaded, ignore
-    guard mainWindow.isWindowLoaded else { return }
+    guard mainWindow.loaded else { return }
     Logger.log("Syncing UI \(option)", level: .verbose, subsystem: subsystem)
 
     switch option {
@@ -1248,7 +1254,11 @@ class PlayerCore: NSObject {
       info.cacheTime = mpv.getInt(MPVProperty.demuxerCacheTime)
       info.bufferingState = mpv.getInt(MPVProperty.cacheBufferingState)
       DispatchQueue.main.async {
-        self.mainWindow.updatePlayTime(withDuration: true, andProgressBar: true)
+        if self.isInMiniPlayer {
+          self.miniPlayer.updatePlayTime(withDuration: true, andProgressBar: true)
+        } else {
+          self.mainWindow.updatePlayTime(withDuration: true, andProgressBar: true)
+        }
         self.mainWindow.updateNetworkState()
       }
 
@@ -1297,8 +1307,7 @@ class PlayerCore: NSObject {
   }
 
   func sendOSD(_ osd: OSDMessage, autoHide: Bool = true, accessoryView: NSView? = nil) {
-    // querying `mainWindow.isWindowLoaded` will initialize mainWindow unexpectly
-    guard mainWindow.isWindowLoaded && Preference.bool(for: .enableOSD) else { return }
+    guard mainWindow.loaded && Preference.bool(for: .enableOSD) else { return }
     if info.disableOSDForFileLoading {
       guard case .fileStart = osd else {
         return
@@ -1330,6 +1339,9 @@ class PlayerCore: NSObject {
 
   func generateThumbnails() {
     Logger.log("Getting thumbnails", subsystem: subsystem)
+    info.thumbnailsReady = false
+    info.thumbnails.removeAll(keepingCapacity: true)
+    info.thumbnailsProgress = 0
     if #available(macOS 10.12.2, *) {
       DispatchQueue.main.async {
         self.touchBarSupport.touchBarPlaySlider?.resetCachedThumbnails()
@@ -1345,9 +1357,6 @@ class PlayerCore: NSObject {
         return
       }
     }
-    info.thumbnails.removeAll(keepingCapacity: true)
-    info.thumbnailsProgress = 0
-    info.thumbnailsReady = false
     if Preference.bool(for: .enableThumbnailPreview) {
       if let cacheName = info.mpvMd5, ThumbnailCache.fileIsCached(forName: cacheName, forVideo: info.currentURL) {
         Logger.log("Found thumbnail cache", subsystem: subsystem)

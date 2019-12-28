@@ -164,7 +164,10 @@
 "pl_menu.add_file" = "Добавить файл…";
 "pl_menu.add_sub" = "Добавить субтитры…";
 "pl_menu.add_url" = "Добавить URL…";
+"pl_menu.browser" = "Открыть в браузере";
 "pl_menu.clear_playlist" = "Очистить плейлист";
+"pl_menu.copy_url" = "Копировать ссылку";
+"pl_menu.copy_url_multi" = "Копировать ссылки";
 "pl_menu.delete" = "Переместить в Корзину";
 "pl_menu.delete_after_play" = "Переместить в Корзину после воспроизведения";
 "pl_menu.delete_after_play_multi" = "Переместить выбранные в Корзину после воспроизведения";
@@ -177,8 +180,6 @@
 "pl_menu.reveal_in_finder" = "Показать в Finder";
 "pl_menu.title_multi" = "%d элементов";
 "pl_menu.wrong_sub" = "Неверные субтитры!";
-"playlist.chapter_cap" = "ГЛАВЫ";
-"playlist.playlist_cap" = "ПЛЕЙЛИСТ";
 "playlist.total_length" = "%@ в общей сложности";
 "playlist.total_length_with_selected" = "%@ из %@ выбрано";
 "preference.advanced" = "Дополнительно";
@@ -216,4 +217,5 @@
 "touchbar.rewind" = "Перемотка назад";
 "touchbar.seek" = "Перемотка";
 "touchbar.time" = "Временная позиция";
+"touchbar.toggle_pip" = "Переключить в \"Картинка в картинке\"";
 "track.none" = "<Нет>";

@@ -89,6 +89,13 @@
                     "url": "https://github.com/J-rg",
                     "title": "@J-rg"
                 }
+            },
+            {
+                "name": "Viktor",
+                "link": {
+                    "url": "https://github.com/vaviary",
+                    "title": "@vaviary"
+                }
             }
         ]
     },
@@ -112,6 +119,13 @@
                 "link": {
                     "url": "https://github.com/matsune",
                     "title": "@matsune"
+                }
+            },
+            {
+                "name": "LEoREo2247",
+                "link": {
+                    "url": "https://github.com/LEoREo2247",
+                    "title": "@LEoREo2247"
                 }
             }
         ]
@@ -149,6 +163,13 @@
                 "link": {
                     "url": "https://github.com/pradorocchi",
                     "title": "@pradorocchi"
+                }
+            },
+            {
+                "name": "Ailton Vieira Pinto Filho",
+                "link": {
+                    "url": "https://github.com/ailtonvivaz",
+                    "title": "@ailtonvivaz"
                 }
             }
         ]
@@ -206,10 +227,10 @@
         "lang": "uk",
         "translators": [
             {
-                "name": "sevenfourk",
+                "name": "Alexander Zhurovich",
                 "link": {
-                    "url": "https://github.com/sevenfourk",
-                    "title": "@sevenfourk"
+                    "url": "https://github.com/AthirnEleidan",
+                    "title": "@AthirnEleidan"
                 }
             }
         ]
@@ -239,8 +260,8 @@
             {
                 "name": "Marian Vinicay",
                 "link": {
-                    "url": "https://github.com/Marvin99com",
-                    "title": "@Marvin99com"
+                    "url": "https://github.com/marianvinicay",
+                    "title": "@marianvinicay"
                 }
             }
         ]
@@ -253,6 +274,42 @@
                 "link": {
                     "url": "https://github.com/thkir",
                     "title": "@sevenfourk"
+                }
+            }
+        ]
+    },
+    {
+        "lang": "ro",
+        "translators": [
+            {
+                "name": "sfDuhNinja",
+                "link": {
+                    "url": "https://github.com/sfDuhNinja",
+                    "title": "@sfDuhNinja"
+                }
+            }
+        ]
+    },
+    {
+        "lang": "cs",
+        "translators": [
+            {
+                "name": "Vojtěch Koňařík",
+                "link": {
+                    "url": "https://github.com/vojtakonarik",
+                    "title": "@vojtakonarik"
+                }
+            }
+        ]
+    },
+    {
+        "lang": "hi",
+        "translators": [
+            {
+                "name": "Kautilya Save",
+                "link": {
+                    "url": "https://github.com/SensehacK",
+                    "title": "@SensehacK"
                 }
             }
         ]

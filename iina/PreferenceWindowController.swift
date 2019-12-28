@@ -287,7 +287,7 @@ class PreferenceWindowController: NSWindowController {
     }
     let title = (sectionTitleLabel as! NSTextField).stringValue
     var labels = findLabels(in: section)
-    labels.remove(at: labels.index(of: title)!)
+    labels.remove(at: labels.firstIndex(of: title)!)
     return (title, labels)
   }
 
@@ -354,7 +354,7 @@ extension PreferenceWindowController: NSTableViewDelegate, NSTableViewDataSource
       return [
         "image": viewControllers[at: row]?.preferenceTabImage,
         "title": viewControllers[at: row]?.preferenceTabTitle
-      ] as [String: Any]
+      ] as [String: Any?]
     } else {
       guard let result = currentCompletionResults[at: row] else { return nil }
       let noLabel = result.strippedLabel == nil

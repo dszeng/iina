@@ -54,6 +54,9 @@ class MPVController: NSObject {
 
   var fileLoaded: Bool = false
 
+  private var hooks: [UInt64: () -> Void] = [:]
+  private var hookCounter: UInt64 = 1
+
   let observeProperties: [String: mpv_format] = [
     MPVProperty.trackList: MPV_FORMAT_NONE,
     MPVProperty.vf: MPV_FORMAT_NONE,
@@ -345,11 +348,11 @@ class MPVController: NSObject {
     var openGLInitParams = mpv_opengl_init_params(get_proc_address: mpvGetOpenGLFunc,
                                                   get_proc_address_ctx: nil,
                                                   extra_exts: nil)
-    var advanced: CInt = 1
+    // var advanced: CInt = 1
     var params = [
       mpv_render_param(type: MPV_RENDER_PARAM_API_TYPE, data: apiType),
       mpv_render_param(type: MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, data: &openGLInitParams),
-      mpv_render_param(type: MPV_RENDER_PARAM_ADVANCED_CONTROL, data: &advanced),
+      // mpv_render_param(type: MPV_RENDER_PARAM_ADVANCED_CONTROL, data: &advanced),
       mpv_render_param()
     ]
     mpv_render_context_create(&mpvRenderContext, mpv, &params)
@@ -529,6 +532,14 @@ class MPVController: NSObject {
     return parsed!
   }
 
+  // MARK: - Hooks
+
+  func addHook(_ name: MPVHook, priority: Int32 = 0, hook: @escaping () -> Void) {
+    mpv_hook_add(mpv, hookCounter, name.rawValue, priority)
+    hooks[hookCounter] = hook
+    hookCounter += 1
+  }
+
   // MARK: - Events
 
   // Read event and handle it async
@@ -566,6 +577,15 @@ class MPVController: NSObject {
       let level = String(cString: (msg?.pointee.level)!)
       let text = String(cString: (msg?.pointee.text)!)
       Logger.log("mpv log: [\(prefix)] \(level): \(text)", level: .warning, subsystem: .general, appendNewlineAtTheEnd: false)
+
+    case MPV_EVENT_HOOK:
+      let userData = event.pointee.reply_userdata
+      let hookEvent = event.pointee.data.bindMemory(to: mpv_event_hook.self, capacity: 1).pointee
+      let hookID = hookEvent.id
+      if let hook = hooks[userData] {
+        hook()
+      }
+      mpv_hook_continue(mpv, hookID)
 
     case MPV_EVENT_PROPERTY_CHANGE:
       let dataOpaquePtr = OpaquePointer(event.pointee.data)
@@ -740,7 +760,7 @@ class MPVController: NSObject {
           player.sendOSD(data ? .pause : .resume)
           player.info.isPaused = data
         }
-        if player.mainWindow.isWindowLoaded {
+        if player.mainWindow.loaded {
           if Preference.bool(for: .alwaysFloatOnTop) {
             DispatchQueue.main.async {
               self.player.mainWindow.setWindowFloatingOnTop(!data)
@@ -751,6 +771,7 @@ class MPVController: NSObject {
       player.syncUI(.playButton)
 
     case MPVProperty.chapter:
+      player.info.chapter = Int(getInt(MPVProperty.chapter))
       player.syncUI(.time)
       player.syncUI(.chapterList)
       player.postNotification(.iinaMediaTitleChanged)
@@ -871,14 +892,14 @@ class MPVController: NSObject {
       player.postNotification(.iinaAFChanged)
 
     case MPVOption.Window.fullscreen:
-      guard player.mainWindow.isWindowLoaded else { break }
+      guard player.mainWindow.loaded else { break }
       let fs = getFlag(MPVOption.Window.fullscreen)
       if fs != player.mainWindow.fsState.isFullscreen {
         DispatchQueue.main.async(execute: self.player.mainWindow.toggleWindowFullScreen)
       }
 
     case MPVOption.Window.ontop:
-      guard player.mainWindow.isWindowLoaded else { break }
+      guard player.mainWindow.loaded else { break }
       let ontop = getFlag(MPVOption.Window.ontop)
       if ontop != player.mainWindow.isOntop {
         DispatchQueue.main.async {
@@ -888,7 +909,7 @@ class MPVController: NSObject {
       }
 
     case MPVOption.Window.windowScale:
-      guard player.mainWindow.isWindowLoaded else { break }
+      guard player.mainWindow.loaded else { break }
       let windowScale = getDouble(MPVOption.Window.windowScale)
       if fabs(windowScale - player.info.cachedWindowScale) > 10e-10 {
         DispatchQueue.main.async {
@@ -1059,7 +1080,9 @@ fileprivate func mpvGetOpenGLFunc(_ ctx: UnsafeMutableRawPointer?, _ name: Unsaf
 }
 
 fileprivate func mpvUpdateCallback(_ ctx: UnsafeMutableRawPointer?) {
-  let layer = unsafeBitCast(ctx, to: ViewLayer.self)
+  let layer = bridge(ptr: ctx!) as ViewLayer
+  guard !layer.blocked else { return }
+
   layer.mpvGLQueue.async {
     layer.draw()
   }

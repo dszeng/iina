@@ -134,6 +134,10 @@ struct Preference {
     static let musicModeShowAlbumArt = Key("musicModeShowAlbumArt")
 
     static let displayTimeAndBatteryInFullScreen = Key("displayTimeAndBatteryInFullScreen")
+    
+    static let windowBehaviorWhenPip = Key("windowBehaviorWhenPip")
+    static let pauseWhenPip = Key("pauseWhenPip")
+    static let togglePipByMinimizingWindow = Key("togglePipByMinimizingWindow")
 
     // Codec
 
@@ -249,6 +253,8 @@ struct Preference {
     /** Log to log folder (bool) */
     static let enableLogging = Key("enableLogging")
     static let logLevel = Key("logLevel")
+
+    static let displayKeyBindingRawValues = Key("displayKeyBindingRawValues")
 
     /** unused */
     // static let resizeFrameBuffer = Key("resizeFrameBuffer")
@@ -592,6 +598,18 @@ struct Preference {
       }
     }
   }
+  
+  enum WindowBehaviorWhenPip: Int, InitializingFromKey {
+    case doNothing = 0
+    case hide
+    case minimize
+    
+    static var defaultValue = WindowBehaviorWhenPip.doNothing
+    
+    init?(key: Key) {
+      self.init(rawValue: Preference.integer(for: key))
+    }
+  }
 
   enum ToolBarButton: Int {
     case settings = 0
@@ -681,6 +699,10 @@ struct Preference {
     .musicModeShowPlaylist: false,
     .musicModeShowAlbumArt: true,
     .displayTimeAndBatteryInFullScreen: false,
+    
+    .windowBehaviorWhenPip: WindowBehaviorWhenPip.doNothing.rawValue,
+    .pauseWhenPip: false,
+    .togglePipByMinimizingWindow: false,
 
     .videoThreads: 0,
     .hardwareDecoder: HardwareDecoderOption.auto.rawValue,
@@ -745,6 +767,7 @@ struct Preference {
     .useMpvOsd: false,
     .enableLogging: false,
     .logLevel: Logger.Level.debug.rawValue,
+    .displayKeyBindingRawValues: false,
     .userOptions: [],
     .useUserDefinedConfDir: false,
     .userDefinedConfDir: "~/.config/mpv/",

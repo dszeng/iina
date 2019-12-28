@@ -10,9 +10,6 @@ import Cocoa
 
 class Utility {
 
-  static let tabTitleFontAttributes = FontAttributes(font: .system, size: .system, align: .center).value
-  static let tabTitleActiveFontAttributes = FontAttributes(font: .systemBold, size: .system, align: .center).value
-
   static let supportedFileExt: [MPVTrack.TrackType: [String]] = [
     .video: ["mkv", "mp4", "avi", "m4v", "mov", "3gp", "ts", "mts", "m2ts", "wmv", "flv", "f4v", "asf", "webm", "rm", "rmvb", "qt", "dv", "mpg", "mpeg", "mxf", "vob", "gif"],
     .audio: ["mp3", "aac", "mka", "dts", "flac", "ogg", "oga", "mogg", "m4a", "ac3", "opus", "wav", "wv", "aiff", "ape", "tta", "tak"],
@@ -37,6 +34,8 @@ class Utility {
       alert.messageText = NSLocalizedString("alert.title_info", comment: "Information")
     case .warning:
       alert.messageText = NSLocalizedString("alert.title_warning", comment: "Warning")
+    @unknown default:
+      assertionFailure("Unknown \(type(of: alertStyle)) \(alertStyle)")
     }
     alert.informativeText = message
     alert.alertStyle = alertStyle
@@ -52,6 +51,8 @@ class Utility {
       alert.messageText = NSLocalizedString("alert.title_info", comment: "Information")
     case .warning:
       alert.messageText = NSLocalizedString("alert.title_warning", comment: "Warning")
+    @unknown default:
+      assertionFailure("Unknown \(type(of: style)) \(style)")
     }
 
     var format: String
@@ -387,6 +388,11 @@ class Utility {
 
   // MARK: - Util functions
 
+  static func setBoldTitle(for button: NSButton, _ active: Bool) {
+    button.attributedTitle = NSAttributedString(string: button.title,
+                                                attributes: FontAttributes(font: active ? .systemBold : .system, size: .system, align: .center).value)
+  }
+
   static func toRealSubScale(fromDisplaySubScale scale: Double) -> Double {
     return scale > 0 ? scale : -1 / scale
   }
@@ -425,7 +431,7 @@ class Utility {
     }
   }
 
-  // Do not use this function for macOS 10.14+
+  @available(macOS, deprecated: 10.14, message: "Use the system appearance-based APIs instead.")
   static func getAppearanceAndMaterial(from theme: Preference.Theme) -> (NSAppearance?, NSVisualEffectView.Material) {
     switch theme {
     case .ultraDark:

@@ -164,7 +164,10 @@
 "pl_menu.add_file" = "Datei hinzufügen …";
 "pl_menu.add_sub" = "Untertitel hinzufügen …";
 "pl_menu.add_url" = "Adresse hinzufügen …";
+"pl_menu.browser" = "In Browser öffnen";
 "pl_menu.clear_playlist" = "Wiedergabeliste leeren";
+"pl_menu.copy_url" = "URL kopieren";
+"pl_menu.copy_url_multi" = "URLs kopieren";
 "pl_menu.delete" = "In den Papierkorb legen";
 "pl_menu.delete_after_play" = "Nach Wiedergabe in den Papierkorb legen";
 "pl_menu.delete_after_play_multi" = "Auswahl nach Wiedergabe in den Papierkorb legen";
@@ -177,8 +180,6 @@
 "pl_menu.reveal_in_finder" = "Im Finder anzeigen";
 "pl_menu.title_multi" = "%d Dateien";
 "pl_menu.wrong_sub" = "Falscher Untertitel!";
-"playlist.chapter_cap" = "KAPITEL";
-"playlist.playlist_cap" = "WIEDERGABELISTE";
 "playlist.total_length" = "%@ insgesamt";
 "playlist.total_length_with_selected" = "%@ von %@ ausgewählt";
 "preference.advanced" = "Erweitert";
@@ -216,4 +217,5 @@
 "touchbar.rewind" = "Zurückspulen";
 "touchbar.seek" = "Verlauf";
 "touchbar.time" = "Position";
+"touchbar.toggle_pip" = "Bild-in-Bild ein-/ausschalten";
 "track.none" = "Keine";

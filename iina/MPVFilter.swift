@@ -27,7 +27,7 @@ class MPVFilter: NSObject {
     case crop = "crop"
     case expand = "expand"
     case flip = "flip"
-    case mirror = "mirror"
+    case mirror = "hflip"
     case lavfi = "lavfi"
   }
 
@@ -46,7 +46,7 @@ class MPVFilter: NSObject {
 
   // FIXME: use lavfi hflip
   static func mirror() -> MPVFilter {
-    return MPVFilter(name: "mirror", label: nil, params: nil)
+    return MPVFilter(name: "hflip", label: nil, params: nil)
   }
 
   /**
@@ -109,7 +109,19 @@ class MPVFilter: NSObject {
     self.type = FilterType(rawValue: name)
     self.name = name
     self.label = label
-    self.params = params
+    if let params = params, let type = type, let format = MPVFilter.formats[type]?.components(separatedBy: ":") {
+      var translated: [String: String] = [:]
+      for (key, value) in params {
+        if let number = Int(key.dropFirst()) {
+          translated[format[number]] = value
+        } else {
+          translated[key] = value
+        }
+      }
+      self.params = translated
+    } else {
+      self.params = params
+    }
   }
 
   init?(rawString: String) {
